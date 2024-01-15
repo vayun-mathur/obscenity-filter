@@ -62,14 +62,19 @@ def get_descriptors(model, iterator):
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
+from flask_cors import CORS, cross_origin
+cors = CORS(app)
 
 @app.route('/api', methods=['POST'])
+@cross_origin(origin='*')
 def api():
     data = request.get_json()
     texts = data["texts"]
+    print(len(texts))
     results = get_descriptors(model, texts)
+    print(len(results))
     # process the data
-    return jsonify({'status': 'success', 'results': results})
+    return jsonify({'status': 'success', 'results': results}), 200
 
 if __name__ == '__main__':
     app.run(port=5000)
