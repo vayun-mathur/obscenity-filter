@@ -1,3 +1,4 @@
+from functools import partial
 import numpy as np
 import torch
 import torch.nn as nn
@@ -30,17 +31,44 @@ model.eval()
 
 tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
 
-def evaluate(model, iterator):
-    pred = []
-    with torch.no_grad():
+from torch.utils.data import Dataset
+
+from torch.nn.utils.rnn import pad_sequence
+
+class ToxicDataset(Dataset):
+    
+    def __init__(self, tokenizer: BertTokenizer, iterator):
+        self.tokenizer = tokenizer
+        self.pad_idx = tokenizer.pad_token_id
+        self.X = []
         for text in tqdm(iterator):
             tokens = tokenizer.encode(text, add_special_tokens=True)
             if len(tokens) > 120:
                 tokens = tokens[:119] + [tokens[-1]]
-            x = torch.LongTensor([tokens])
+            x = torch.LongTensor(tokens)
+            self.X.append(x)        
+    
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, index):
+        return self.X[index]
+
+def collate_fn(x, device):
+    x = pad_sequence(x, batch_first=True, padding_value=0)
+    return x.to(device)
+
+collate_fn = partial(collate_fn, device=device)
+
+def evaluate(model, iterator):
+    pred = []
+    dataset = ToxicDataset(tokenizer, iterator)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=False, collate_fn=collate_fn)
+    with torch.no_grad():
+        for x in tqdm(dataloader):
             mask = (x != 0).float()
             _, outputs = model(x, attention_mask=mask)
-            pred += outputs.cpu().numpy().tolist()
+            pred.extend(outputs.cpu().numpy().tolist())
     return pred
 
 def get_descriptors(model, iterator):
