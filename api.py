@@ -71,19 +71,21 @@ def evaluate(model, iterator):
             pred.extend(outputs.cpu().numpy().tolist())
     return pred
 
-def get_descriptors(model, iterator):
+def get_descriptors(model, iterator, categories_check):
     pred = evaluate(model, iterator)
     pred = np.array(pred)
     pred = np.where(pred > 0.5, 1, 0)
     results = []
     categories = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
     for i in range(len(pred)):
+        found = False
         for j, cat in enumerate(reversed(categories)):
             j = len(categories) - 1 - j
-            if pred[i][j] == 1:
+            if pred[i][j] == 1 and categories_check[cat]:
                 results.append(cat)
+                found = True
                 break
-        if(np.sum(pred[i]) == 0):
+        if not found:
             results.append('normal')
     return results
 
@@ -98,8 +100,10 @@ cors = CORS(app)
 def api():
     data = request.get_json()
     texts = data["texts"]
+    categories = data["categories"]
+    print(categories)
     print(len(texts))
-    results = get_descriptors(model, texts)
+    results = get_descriptors(model, texts, categories)
     print(len(results))
     # process the data
     return jsonify({'status': 'success', 'results': results}), 200

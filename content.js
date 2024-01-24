@@ -12,7 +12,7 @@ const readLocalStorage = async (key) => {
 async function apiCall(text) {
   // call obscenity api at 127.0.0.1:5000/api
 
-  items = await readLocalStorage(["toxic", "severely toxic", "obscene", "threat", "insult", "identity_hate"]);
+  items = await readLocalStorage(["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]);
 
   console.log(items)
 

@@ -1,28 +1,44 @@
-const t1 = document.getElementById("t1");
-const t2 = document.getElementById("t2");
-const t3 = document.getElementById("t3");
-const t4 = document.getElementById("t4");
-const t5 = document.getElementById("t5");
-const t6 = document.getElementById("t6");
+categories = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 
-//chrome.storage.local.setIfNull({ "toxic": false, "severely toxic": false, "obscene": false });
+const readLocalStorage = async (key) => {
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(key, function (result) {
+        resolve(result);
+      });
+    });
+  };
 
-t1.addEventListener("change", function () {
-    chrome.storage.local.set({ "toxic": t1.checked })
-});
-t2.addEventListener("change", function () {
-    chrome.storage.local.set({ "severely toxic": t2.checked })
-});
-t3.addEventListener("change", function () {
-    chrome.storage.local.set({ "obscene": t3.checked })
-});
+async function main() {
+items = await readLocalStorage(categories)
+console.log(items)
 
-t4.addEventListener("change", function () {
-    chrome.storage.local.set({ "threat": t4.checked })
-});
-t5.addEventListener("change", function () {
-    chrome.storage.local.set({ "insult": t5.checked })
-});
-t6.addEventListener("change", function () {
-    chrome.storage.local.set({ "identity_hate": t6.checked })
-});
+for(let index in categories) {
+    let category = categories[index]
+    // create a new checkbox and add to body
+    let checkbox = document.createElement('input')
+    checkbox.type = "checkbox"
+    checkbox.name = category
+    if(items[category] === true) {
+        checkbox.checked = true
+    }
+    //add text first
+    let text = document.createTextNode(category)
+    document.body.appendChild(text)
+    // add to body
+    document.body.appendChild(checkbox)
+    //add event listener
+    checkbox.addEventListener('change', function() {
+        // save to local storage
+        let save = {}
+        save[category] = checkbox.checked
+        chrome.storage.local.set(save, function() {
+            console.log(save)
+        })
+    })
+    // add newline
+    let newline = document.createElement('br')
+    document.body.appendChild(newline)
+}
+}
+
+main()
