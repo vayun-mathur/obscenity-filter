@@ -1,4 +1,5 @@
 categories = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
+inputs = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate", "server"]
 
 const readLocalStorage = async (key) => {
     return new Promise((resolve, reject) => {
@@ -9,7 +10,7 @@ const readLocalStorage = async (key) => {
   };
 
 async function main() {
-items = await readLocalStorage(categories)
+items = await readLocalStorage(inputs)
 console.log(items)
 
 for(let index in categories) {
@@ -39,6 +40,26 @@ for(let index in categories) {
     let newline = document.createElement('br')
     document.body.appendChild(newline)
 }
+
+// add server input
+let serverInput = document.createElement('input')
+serverInput.type = "text"
+serverInput.name = "server"
+serverInput.value = items["server"]
+document.body.appendChild(serverInput)
+// add event listener
+serverInput.addEventListener('change', function() {
+    // save to local storage
+    let save = {}
+    save["server"] = serverInput.value
+    chrome.storage.local.set(save, function() {
+        console.log(save)
+    })
+})
+// add newline
+let newline = document.createElement('br')
+document.body.appendChild(newline)
+
 }
 
 main()

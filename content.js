@@ -10,13 +10,14 @@ const readLocalStorage = async (key) => {
 };
 
 async function apiCall(text) {
-  // call obscenity api at 127.0.0.1:5000/api
 
   items = await readLocalStorage(["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]);
 
   console.log(items)
 
-  const response = await fetch('http://127.0.0.1:5000/api', { 
+  server = (await readLocalStorage(["server"]))["server"]
+
+  const response = await fetch('http://'+server+'/api', { 
     method: 'POST', 
     body: JSON.stringify({"texts": text, "categories": items}),
     headers: {
@@ -26,19 +27,6 @@ async function apiCall(text) {
 
   const data = await response.json();
   return data;
-}
-
-async function keepText(originalText) {
-  //TODO replace with call to obscenity api
-  result = await apiCall(originalText);
-  result = result["results"][0]
-  console.log(result)
-  if(result != "normal") {
-    return result;
-  }
-  else {
-    return originalText;
-  }
 }
 
 nodes_to_replace = []
@@ -65,6 +53,7 @@ async function replaceText() {
   }
   result = await apiCall(texts);
   result = result["results"]
+  if(result == undefined) return;
   console.log(result)
   j = 0;
   for(i = 0; i < nodes_to_replace.length; i++) {
