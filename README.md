@@ -2,7 +2,7 @@
 
 This is a chrome extension that uses AI to filter out textual content on the internet that you do not wish to be exposed to.
 
-The extension is right now incomplete, and the server that checks the text is not running, so using it right not is not possible. Please check back in a month or two for the first complete release.
+This extension currently must be installed manually, by downloading the CRX file in the latest release. Additionally, you will need to run `python api.py` on a computer to run the backend. This can be done on the computer that is running the extension (put "localhost:5000" as the server if you do this).
 
 ## Motivation
 

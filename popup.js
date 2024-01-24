@@ -42,6 +42,8 @@ for(let index in categories) {
 }
 
 // add server input
+let text = document.createTextNode("server: ")
+document.body.appendChild(text)
 let serverInput = document.createElement('input')
 serverInput.type = "text"
 serverInput.name = "server"
